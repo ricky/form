@@ -280,6 +280,16 @@ $.fn.ajaxSubmit = function(options) {
             var beforeSend = s.beforeSend;
             s.beforeSend = function(xhr, o) {
                 o.data = formdata;
+                
+                // Support FormData emulation for browsers that support File API
+                // Requires https://github.com/francois2metz/html5-formdata
+                if (o.data.fake) {
+                	xhr.setRequestHeader("Content-Type", "multipart/form-data; boundary="+ o.data.boundary);
+                	xhr.send = function(data) {
+                		xhr.sendAsBinary(data.toString());
+                	}
+                }
+                
                 if(beforeSend)
                     beforeSend.call(this, xhr, o);
         };
